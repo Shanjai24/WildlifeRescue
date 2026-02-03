@@ -1,0 +1,40 @@
+import dotenv from 'dotenv';
+dotenv.config();
+import express from 'express';
+import cors from 'cors';
+import { sequelize } from './lib/db.js';
+import authRouter from './routes/auth.js';
+import incidentsRouter from './routes/incidents.js';
+import rescuerRouter from './routes/rescuer.js';
+import adminRouter from './routes/admin.js';
+
+const app = express();
+
+app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(express.json());
+
+app.get('/health', (req, res) => {
+  res.json({ ok: true });
+});
+
+app.use('/auth', authRouter);
+app.use('/incidents', incidentsRouter);
+app.use('/rescuer', rescuerRouter);
+app.use('/admin', adminRouter);
+
+const PORT = process.env.PORT || 4000;
+
+async function start() {
+  try {
+    await sequelize.authenticate();
+    await sequelize.sync();
+    app.listen(PORT, () => {
+      console.log(`Backend server running at http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('Failed to start server', err);
+    process.exit(1);
+  }
+}
+
+start();
