@@ -1,6 +1,8 @@
--- Create database (run once)
--- CREATE DATABASE IF NOT EXISTS animal_rescue;
--- USE animal_rescue;
+-- Step 1: Create database
+CREATE DATABASE IF NOT EXISTS `animalrescue`;
+USE `animalrescue`;
+
+-- Step 2: Create tables
 
 CREATE TABLE IF NOT EXISTS `Users` (
   `id` INT AUTO_INCREMENT PRIMARY KEY,
@@ -81,3 +83,7 @@ CREATE TABLE IF NOT EXISTS `Notifications` (
   `updatedAt` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   CONSTRAINT `fk_notification_user` FOREIGN KEY (`userId`) REFERENCES `Users`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Step 3: Verify tables created
+SELECT 'Tables created successfully!' AS Status;
+SHOW TABLES;

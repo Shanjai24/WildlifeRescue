@@ -1,7 +1,10 @@
-import { Sequelize, DataTypes } from 'sequelize';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
+ import { Sequelize, DataTypes } from 'sequelize';
+ import path from 'path';
+ import { fileURLToPath } from 'url';
+ import dotenv from 'dotenv';
+ 
+ dotenv.config();
+ 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -14,7 +17,7 @@ if (dialect === 'mysql') {
     port: Number(process.env.DB_PORT || 3306),
     username: process.env.DB_USER || 'root',
     password: process.env.DB_PASS || '',
-    database: process.env.DB_NAME || 'animal_rescue',
+    database: process.env.DB_NAME || 'animalrescue',
     logging: false
   };
 } else {
@@ -32,6 +35,8 @@ export const User = sequelize.define('User', {
   email: { type: DataTypes.STRING, unique: true, allowNull: false },
   passwordHash: { type: DataTypes.STRING, allowNull: false },
   role: { type: DataTypes.ENUM('animal_lover', 'rescuer', 'admin'), allowNull: false }
+}, {
+  tableName: 'Users'
 });
 
 export const Organization = sequelize.define('Organization', {
@@ -44,9 +49,13 @@ export const Organization = sequelize.define('Organization', {
   contactPhone: { type: DataTypes.STRING },
   contactEmail: { type: DataTypes.STRING },
   verificationStatus: { type: DataTypes.ENUM('pending', 'verified', 'rejected'), defaultValue: 'pending' }
+}, {
+  tableName: 'Organizations'
 });
 
-export const Rescuer = sequelize.define('Rescuer', {});
+export const Rescuer = sequelize.define('Rescuer', {}, {
+  tableName: 'Rescuers'
+});
 
 export const Incident = sequelize.define('Incident', {
   addressText: { type: DataTypes.STRING },
@@ -57,36 +66,59 @@ export const Incident = sequelize.define('Incident', {
   description: { type: DataTypes.TEXT, allowNull: false },
   priority: { type: DataTypes.ENUM('low', 'medium', 'critical'), allowNull: false },
   status: { type: DataTypes.ENUM('reported', 'accepted', 'in_progress', 'completed'), defaultValue: 'reported' }
+}, {
+  tableName: 'Incidents'
 });
 
 export const IncidentStatusHistory = sequelize.define('IncidentStatusHistory', {
   status: { type: DataTypes.ENUM('reported', 'accepted', 'in_progress', 'completed'), allowNull: false },
   note: { type: DataTypes.TEXT }
+}, {
+  tableName: 'IncidentStatusHistories'
 });
 
 export const Notification = sequelize.define('Notification', {
   type: { type: DataTypes.ENUM('incident_alert', 'status_update'), allowNull: false },
   payload: { type: DataTypes.JSON, allowNull: false },
   isRead: { type: DataTypes.BOOLEAN, defaultValue: false }
+}, {
+  tableName: 'Notifications'
 });
 
-User.hasOne(Rescuer, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' });
-Rescuer.belongsTo(User);
+// Relationships
+User.hasOne(Rescuer, { foreignKey: { name: 'UserId', allowNull: false }, onDelete: 'CASCADE' });
+Rescuer.belongsTo(User, { foreignKey: 'UserId' });
 
-Organization.hasMany(Rescuer, { foreignKey: { allowNull: false }, onDelete: 'CASCADE' });
-Rescuer.belongsTo(Organization);
+Organization.hasMany(Rescuer, { foreignKey: { name: 'OrganizationId', allowNull: false }, onDelete: 'CASCADE' });
+Rescuer.belongsTo(Organization, { foreignKey: 'OrganizationId' });
 
 User.hasMany(Incident, { as: 'ReportedIncidents', foreignKey: { name: 'reporterId', allowNull: false }, onDelete: 'CASCADE' });
-Incident.belongsTo(User, { as: 'Reporter', foreignKey: { name: 'reporterId' } });
+Incident.belongsTo(User, { as: 'Reporter', foreignKey: 'reporterId' });
 
-Organization.hasMany(Incident, { as: 'AssignedIncidents', foreignKey: { name: 'assignedOrganizationId' } });
-Incident.belongsTo(Organization, { as: 'AssignedOrganization', foreignKey: { name: 'assignedOrganizationId' } });
+Organization.hasMany(Incident, { as: 'AssignedIncidents', foreignKey: 'assignedOrganizationId' });
+Incident.belongsTo(Organization, { as: 'AssignedOrganization', foreignKey: 'assignedOrganizationId' });
 
 Incident.hasMany(IncidentStatusHistory, { foreignKey: { name: 'incidentId', allowNull: false }, onDelete: 'CASCADE' });
-IncidentStatusHistory.belongsTo(Incident, { foreignKey: { name: 'incidentId' } });
+IncidentStatusHistory.belongsTo(Incident, { foreignKey: 'incidentId' });
 
 User.hasMany(IncidentStatusHistory, { foreignKey: { name: 'changedByUserId', allowNull: false } });
-IncidentStatusHistory.belongsTo(User, { foreignKey: { name: 'changedByUserId' } });
+IncidentStatusHistory.belongsTo(User, { as: 'ChangedBy', foreignKey: 'changedByUserId' });
 
-User.hasMany(Notification, { foreignKey: { name: 'userId', allowNull: true }, onDelete: 'CASCADE' });
-Notification.belongsTo(User, { foreignKey: { name: 'userId', allowNull: true } });
+User.hasMany(Notification, { foreignKey: 'userId', onDelete: 'CASCADE' });
+Notification.belongsTo(User, { foreignKey: 'userId' });
+
+// Sync database (creates tables if they don't exist)
+export async function syncDatabase() {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connection established successfully.');
+    
+    // alter: true will update existing tables to match models
+    // force: true would drop and recreate tables (USE WITH CAUTION - DELETES DATA)
+    await sequelize.sync({ alter: true });
+    console.log('All models were synchronized successfully.');
+  } catch (error) {
+    console.error('Unable to connect to the database:', error);
+    throw error;
+  }
+}

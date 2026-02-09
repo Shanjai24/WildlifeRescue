@@ -26,13 +26,21 @@ const PORT = process.env.PORT || 4000;
 
 async function start() {
   try {
+    // Test database connection
     await sequelize.authenticate();
-    await sequelize.sync();
+    console.log('✅ Database connection established successfully.');
+    
+    // Sync database tables (alter: true will update existing tables without dropping data)
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database tables synchronized successfully.');
+    
+    // Start server
     app.listen(PORT, () => {
-      console.log(`Backend server running at http://localhost:${PORT}`);
+      console.log(`✅ Backend server running at http://localhost:${PORT}`);
+      console.log(`   Database: ${process.env.DB_NAME || 'SQLite'}`);
     });
   } catch (err) {
-    console.error('Failed to start server', err);
+    console.error('❌ Failed to start server:', err);
     process.exit(1);
   }
 }
