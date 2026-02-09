@@ -105,11 +105,6 @@ export default {
         '3xl': '2rem',
         full: '9999px',
       },
-      transitionDuration: {
-        fast: '150ms',
-        base: '200ms',
-        slow: '300ms',
-      },
       opacity: {
         disabled: '0.5',
       },
