@@ -136,7 +136,7 @@ html, body, #root {
 
   /* Card Styles */
   .card {
-    @apply bg-white rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-fast;
+    @apply bg-white rounded-lg border border-neutral-200 shadow-sm hover:shadow-md transition-shadow duration-150;
   }
 
   .card-padding {
