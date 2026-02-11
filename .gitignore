@@ -1,0 +1,12 @@
+node_modules/
+dist/
+dist-ssr/
+.env
+.env.*
+data/
+ml/models/
+ml/.venv*/
+ml/__pycache__/
+*.log
+.DS_Store
+Thumbs.db
