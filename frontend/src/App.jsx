@@ -22,11 +22,19 @@ function Nav() {
         </Link>
 
         {/* Navigation Links */}
-        <div className="hidden md:flex items-center gap-8">
-          <Link to="/report" className="link-subtle text-sm font-medium">Report Incident</Link>
-          <Link to="/my-incidents" className="link-subtle text-sm font-medium">My Incidents</Link>
-          <Link to="/rescuer" className="link-subtle text-sm font-medium">Rescuer Hub</Link>
-        </div>
+        {role && (
+          <div className="hidden md:flex items-center gap-8">
+            {role === 'animal_lover' && (
+              <>
+              <Link to="/report" className="link-subtle text-sm font-medium">Report Incident</Link>
+              <Link to="/my-incidents" className="link-subtle text-sm font-medium">My Incidents</Link>
+              </>
+            )}
+            {role === 'rescuer' && (
+              <Link to="/rescuer" className="link-subtle text-sm font-medium">Rescuer Hub</Link>
+            )}
+          </div>
+        )}
 
         {/* Auth Buttons */}
         <div className="flex items-center gap-3">

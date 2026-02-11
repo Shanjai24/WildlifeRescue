@@ -44,16 +44,6 @@ export default function ReportIncident() {
     }
   };
 
-  if (role !== 'animal_lover') {
-    return (
-      <div className="page-container">
-        <div className="alert alert-info max-w-2xl mx-auto">
-          <p className="font-medium">Access Restricted</p>
-          <p className="text-sm mt-1">Only registered animal lovers can report incidents. Please login or create an account to continue.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="page-container max-w-4xl">

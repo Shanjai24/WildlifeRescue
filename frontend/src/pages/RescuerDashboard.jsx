@@ -94,28 +94,6 @@ export default function RescuerDashboard() {
     }
   };
 
-  if (role !== 'rescuer') {
-    return (
-      <div className="page-container">
-        <div className="alert alert-info max-w-2xl mx-auto">
-          <p className="font-medium">Access Restricted</p>
-          <p className="text-sm mt-1">Only registered rescue organizations can access the rescuer dashboard. Please login or create an organization account.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (organization?.verificationStatus !== 'verified') {
-    return (
-      <div className="page-container">
-        <div className="alert alert-warning max-w-2xl mx-auto">
-          <p className="font-medium">⏳ Verification Pending</p>
-          <p className="text-sm mt-1">Your organization is currently under review. Once verified, you'll be able to view and respond to rescue incidents.</p>
-          <p className="text-xs mt-2 opacity-75">Organization: {organization?.name || 'N/A'}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="page-container max-w-5xl">

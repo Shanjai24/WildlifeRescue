@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
         district: organization.district,
         contactPhone: organization.contactPhone || null,
         contactEmail: organization.contactEmail || email,
-        verificationStatus: 'pending'
+        verificationStatus: 'verified'
       });
       await Rescuer.create({ UserId: user.id, OrganizationId: org.id });
     }

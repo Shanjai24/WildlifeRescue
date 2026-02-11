@@ -1,0 +1,31 @@
+{
+  "priority_features": [
+    "animal_category",
+    "incident_type",
+    "time_of_day",
+    "location_type",
+    "weather",
+    "has_bleeding",
+    "has_trapped",
+    "has_unconscious",
+    "near_highway",
+    "in_storm"
+  ],
+  "success_features": [
+    "priority",
+    "animal_category",
+    "incident_type",
+    "org_type",
+    "response_time_min",
+    "distance_km",
+    "weather",
+    "location_type"
+  ],
+  "priority_classes": [
+    "critical",
+    "low",
+    "medium"
+  ],
+  "training_date": "2026-02-10 20:36:27",
+  "dataset_size": 1500
+}

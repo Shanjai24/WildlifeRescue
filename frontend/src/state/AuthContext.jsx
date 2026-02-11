@@ -4,18 +4,32 @@ import api from '../api/client';
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  const [token, setToken] = useState(localStorage.getItem('token'));
-  const [role, setRole] = useState(localStorage.getItem('role'));
-  const [organization, setOrganization] = useState(null);
+  // Change from localStorage to sessionStorage
+  const [token, setToken] = useState(sessionStorage.getItem('token'));
+  const [role, setRole] = useState(sessionStorage.getItem('role'));
+  const [organization, setOrganization] = useState(
+    sessionStorage.getItem('organization') 
+      ? JSON.parse(sessionStorage.getItem('organization')) 
+      : null
+  );
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('token', token);
+      sessionStorage.setItem('token', token);
     } else {
-      localStorage.removeItem('token');
+      sessionStorage.removeItem('token');
     }
-    if (role) localStorage.setItem('role', role);
-  }, [token, role]);
+    if (role) {
+      sessionStorage.setItem('role', role);
+    } else {
+      sessionStorage.removeItem('role');
+    }
+    if (organization) {
+      sessionStorage.setItem('organization', JSON.stringify(organization));
+    } else {
+      sessionStorage.removeItem('organization');
+    }
+  }, [token, role, organization]);
 
   const login = async (email, password) => {
     const res = await api.post('/auth/login', { email, password });
@@ -28,6 +42,7 @@ export function AuthProvider({ children }) {
     setToken(null);
     setRole(null);
     setOrganization(null);
+    sessionStorage.clear();
   };
 
   const registerLover = async ({ email, password }) => {
