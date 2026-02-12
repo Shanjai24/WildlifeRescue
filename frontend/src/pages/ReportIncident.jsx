@@ -96,28 +96,57 @@ export default function ReportIncident() {
                 </div>
 
                 {/* Coordinates Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="form-group">
-                    <label className="form-label">Latitude</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      placeholder="40.7580"
-                      step="0.0001"
-                      value={form.latitude}
-                      onChange={(e) => setForm({ ...form, latitude: e.target.value })}
-                    />
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <label className="font-semibold text-neutral-900">Coordinates</label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!navigator.geolocation) {
+                          alert('Geolocation is not supported by your browser');
+                          return;
+                        }
+                        navigator.geolocation.getCurrentPosition(
+                          (position) => {
+                            setForm({
+                              ...form,
+                              latitude: position.coords.latitude,
+                              longitude: position.coords.longitude
+                            });
+                          },
+                          () => {
+                            alert('Unable to retrieve your location');
+                          }
+                        );
+                      }}
+                      className="text-sm text-primary-600 font-medium hover:text-primary-700 flex items-center gap-1"
+                    >
+                      <span className="text-lg">📍</span> Use My Current Location
+                    </button>
                   </div>
-                  <div className="form-group">
-                    <label className="form-label">Longitude</label>
-                    <input
-                      type="number"
-                      className="form-input"
-                      placeholder="-73.9855"
-                      step="0.0001"
-                      value={form.longitude}
-                      onChange={(e) => setForm({ ...form, longitude: e.target.value })}
-                    />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="form-group">
+                      <label className="form-label text-xs">Latitude</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="40.7580"
+                        step="0.0001"
+                        value={form.latitude}
+                        onChange={(e) => setForm({ ...form, latitude: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label text-xs">Longitude</label>
+                      <input
+                        type="number"
+                        className="form-input"
+                        placeholder="-73.9855"
+                        step="0.0001"
+                        value={form.longitude}
+                        onChange={(e) => setForm({ ...form, longitude: e.target.value })}
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

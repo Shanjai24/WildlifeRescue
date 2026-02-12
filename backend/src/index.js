@@ -5,6 +5,7 @@ import cors from 'cors';
 import { sequelize } from './lib/db.js';
 import authRouter from './routes/auth.js';
 import incidentsRouter from './routes/incidents.js';
+import notificationRoutes from './routes/notifications.js';
 import rescuerRouter from './routes/rescuer.js';
 import adminRouter from './routes/admin.js';
 import aiServiceRoutes from './routes/ai-services.js';
@@ -21,6 +22,7 @@ app.get('/health', (req, res) => {
 
 app.use('/auth', authRouter);
 app.use('/incidents', incidentsRouter);
+app.use('/notifications', notificationRoutes);
 app.use('/rescuer', rescuerRouter);
 app.use('/admin', adminRouter);
 app.use('/api/ai', aiServiceRoutes);
@@ -34,11 +36,11 @@ async function start() {
     // Test database connection
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
-    
+
     // Sync database tables (alter: true will update existing tables without dropping data)
     await sequelize.sync({ alter: true });
     console.log('✅ Database tables synchronized successfully.');
-    
+
     // Start server
     app.listen(PORT, () => {
       console.log(`✅ Backend server running at http://localhost:${PORT}`);

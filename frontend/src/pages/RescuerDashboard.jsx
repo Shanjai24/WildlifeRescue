@@ -25,6 +25,34 @@ export default function RescuerDashboard() {
     }
     if (role === 'rescuer' && organization?.verificationStatus === 'verified') {
       load();
+
+      // Subscribe to real-time notifications with auth token
+      const token = sessionStorage.getItem('token');
+      const eventSource = new EventSource(`http://localhost:4000/notifications/stream?token=${token}`);
+
+      eventSource.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        if (data.type === 'connected') {
+          console.log(data.message);
+        } else if (data.type === 'new_incident') {
+          // Add new incident to alerts
+          setAlerts((prev) => [data.payload, ...prev]);
+          // Show toast notification
+          // Using a simple alert for now, could be enhanced with a toast library
+          setSuccessMsg(`🚨 New Incident Reported: ${data.payload.incidentType} ${data.payload.animalCategory}`);
+          // Clear success message after 5 seconds
+          setTimeout(() => setSuccessMsg(null), 5000);
+        }
+      };
+
+      eventSource.onerror = (err) => {
+        console.error('EventSource failed:', err);
+        eventSource.close();
+      };
+
+      return () => {
+        eventSource.close();
+      };
     }
   }, [role, organization]);
 
