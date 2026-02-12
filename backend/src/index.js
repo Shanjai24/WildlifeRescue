@@ -7,6 +7,8 @@ import authRouter from './routes/auth.js';
 import incidentsRouter from './routes/incidents.js';
 import rescuerRouter from './routes/rescuer.js';
 import adminRouter from './routes/admin.js';
+import aiServiceRoutes from './routes/ai-services.js';
+import aiAnalyticsRoutes from './routes/ai-analytics.js';
 
 const app = express();
 
@@ -21,6 +23,9 @@ app.use('/auth', authRouter);
 app.use('/incidents', incidentsRouter);
 app.use('/rescuer', rescuerRouter);
 app.use('/admin', adminRouter);
+app.use('/api/ai', aiServiceRoutes);
+app.use('/api/analytics', aiAnalyticsRoutes);
+app.use('/api/predictions', aiAnalyticsRoutes);
 
 const PORT = process.env.PORT || 4000;
 

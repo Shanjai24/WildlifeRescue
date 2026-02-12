@@ -1,10 +1,10 @@
- import { Sequelize, DataTypes } from 'sequelize';
- import path from 'path';
- import { fileURLToPath } from 'url';
- import dotenv from 'dotenv';
- 
- dotenv.config();
- 
+import { Sequelize, DataTypes } from 'sequelize';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -62,12 +62,74 @@ export const Incident = sequelize.define('Incident', {
   latitude: { type: DataTypes.DECIMAL(9, 6) },
   longitude: { type: DataTypes.DECIMAL(9, 6) },
   animalCategory: { type: DataTypes.ENUM('dog', 'cat', 'bird', 'wildlife', 'other'), allowNull: false },
+  aiSpecies: { type: DataTypes.STRING },
+  aiScientificName: { type: DataTypes.STRING },
+  aiConservationStatus: { type: DataTypes.STRING },
   incidentType: { type: DataTypes.ENUM('injured', 'trapped', 'endangered', 'aggressive', 'other'), allowNull: false },
+  aiInjurySeverity: { type: DataTypes.STRING },
+  aiInjuryType: { type: DataTypes.STRING },
   description: { type: DataTypes.TEXT, allowNull: false },
+  aiRecommendations: { type: DataTypes.JSON },
+  aiConfidenceScore: { type: DataTypes.DECIMAL(5, 4) },
+  aiVisionProcessed: { type: DataTypes.BOOLEAN, defaultValue: false },
   priority: { type: DataTypes.ENUM('low', 'medium', 'critical'), allowNull: false },
   status: { type: DataTypes.ENUM('reported', 'accepted', 'in_progress', 'completed'), defaultValue: 'reported' }
 }, {
   tableName: 'Incidents'
+});
+
+export const PopulationTrend = sequelize.define('PopulationTrend', {
+  species: { type: DataTypes.STRING, allowNull: false },
+  region: { type: DataTypes.STRING, allowNull: false },
+  month: { type: DataTypes.STRING(7), allowNull: false }, // YYYY-MM
+  populationCount: { type: DataTypes.INTEGER, allowNull: false },
+  trendDirection: { type: DataTypes.ENUM('increasing', 'stable', 'decreasing'), defaultValue: 'stable' }
+}, {
+  tableName: 'PopulationTrends'
+});
+
+export const BiodiversityMetric = sequelize.define('BiodiversityMetric', {
+  region: { type: DataTypes.STRING, allowNull: false },
+  shannonIndex: { type: DataTypes.DECIMAL(5, 4) },
+  simpsonIndex: { type: DataTypes.DECIMAL(5, 4) },
+  speciesRichness: { type: DataTypes.INTEGER },
+  totalIndividuals: { type: DataTypes.INTEGER },
+  measuredAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW }
+}, {
+  tableName: 'BiodiversityMetrics'
+});
+
+export const HabitatHealth = sequelize.define('HabitatHealth', {
+  region: { type: DataTypes.STRING, allowNull: false },
+  healthScore: { type: DataTypes.DECIMAL(5, 2), allowNull: false },
+  forestCoverPercent: { type: DataTypes.DECIMAL(5, 2) },
+  waterQualityStatus: { type: DataTypes.STRING },
+  airQualityStatus: { type: DataTypes.STRING },
+  encroachmentLevel: { type: DataTypes.STRING }
+}, {
+  tableName: 'HabitatHealth'
+});
+
+export const PoachingRisk = sequelize.define('PoachingRisk', {
+  region: { type: DataTypes.STRING, allowNull: false },
+  riskScore: { type: DataTypes.DECIMAL(5, 4), allowNull: false },
+  riskLevel: { type: DataTypes.ENUM('low', 'medium', 'high', 'critical'), defaultValue: 'low' },
+  predictedIncidents: { type: DataTypes.INTEGER, defaultValue: 0 },
+  recommendations: { type: DataTypes.JSON },
+  forecastRange: { type: DataTypes.STRING, defaultValue: 'next_30_days' }
+}, {
+  tableName: 'PoachingRisks'
+});
+
+export const DiseaseRisk = sequelize.define('DiseaseRisk', {
+  species: { type: DataTypes.STRING, allowNull: false },
+  region: { type: DataTypes.STRING, allowNull: false },
+  outbreakProbability: { type: DataTypes.DECIMAL(5, 4), allowNull: false },
+  alertLevel: { type: DataTypes.ENUM('normal', 'elevated', 'high', 'critical'), defaultValue: 'normal' },
+  predictedCases30d: { type: DataTypes.INTEGER, defaultValue: 0 },
+  preventiveMeasures: { type: DataTypes.JSON }
+}, {
+  tableName: 'DiseaseRisks'
 });
 
 export const IncidentStatusHistory = sequelize.define('IncidentStatusHistory', {
@@ -112,7 +174,7 @@ export async function syncDatabase() {
   try {
     await sequelize.authenticate();
     console.log('Database connection established successfully.');
-    
+
     // alter: true will update existing tables to match models
     // force: true would drop and recreate tables (USE WITH CAUTION - DELETES DATA)
     await sequelize.sync({ alter: true });
