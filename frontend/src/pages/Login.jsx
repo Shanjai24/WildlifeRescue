@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../state/AuthContext.jsx';
 
+const LeafIcon = () => (
+  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-nature-leaf">
+    <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 1.8 8.2a7 7 0 0 1-9.8 9.8Z" />
+    <path d="M11 20l5-5" />
+  </svg>
+);
+
 export default function Login() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
@@ -25,45 +32,46 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[calc(100vh-72px)] bg-gradient-to-br from-neutral-50 to-primary-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
-        {/* Card */}
-        <div className="card card-padding space-y-6">
+    <div className="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-0 right-0 w-64 h-64 bg-nature-soft/5 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-64 h-64 bg-nature-clay/5 rounded-full blur-3xl"></div>
+
+      <div className="w-full max-w-lg relative z-10">
+        <div className="card card-padding space-y-10">
           {/* Header */}
-          <div className="text-center space-y-2">
-            <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-600 to-accent-600 rounded-lg flex items-center justify-center">
-                <span className="text-xl">🔐</span>
+          <div className="text-center space-y-4">
+            <div className="flex justify-center mb-6">
+              <div className="w-16 h-16 bg-nature-cream rounded-2xl flex items-center justify-center border border-nature-soft/20 shadow-soft">
+                <LeafIcon />
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-neutral-900">Welcome Back</h1>
-            <p className="text-neutral-600">Sign in to your Wildlife Rescue account</p>
+            <h1 className="text-4xl font-black text-nature-slate tracking-tight">Welcome Back</h1>
+            <p className="text-lg text-nature-slate/60">Sign in to your Wildlife Conservation account</p>
           </div>
 
           {/* Error Alert */}
           {error && (
-            <div className="alert alert-danger">
-              <p className="text-sm font-medium">{error}</p>
+            <div className="px-6 py-4 bg-red-50 border-2 border-red-100 rounded-2xl">
+              <p className="text-red-700 font-bold text-center">{error}</p>
             </div>
           )}
 
           {/* Form */}
-          <form onSubmit={onSubmit} className="space-y-4">
-            {/* Email Input */}
-            <div className="form-group">
+          <form onSubmit={onSubmit} className="space-y-6">
+            <div className="space-y-2">
               <label className="form-label">Email Address</label>
               <input
                 type="email"
                 className="form-input"
-                placeholder="you@example.com"
+                placeholder="name@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
             </div>
 
-            {/* Password Input */}
-            <div className="form-group">
+            <div className="space-y-2">
               <label className="form-label">Password</label>
               <input
                 type="password"
@@ -75,38 +83,37 @@ export default function Login() {
               />
             </div>
 
-            {/* Submit Button */}
             <button
               type="submit"
               disabled={isLoading}
-              className="btn btn-primary btn-full"
+              className="btn-primary w-full py-4 text-lg"
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Processing...' : 'Secure Sign In'}
             </button>
           </form>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200"></div>
+          {/* Footer Navigation */}
+          <div className="flex flex-col gap-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-nature-soft/10"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-6 bg-white text-nature-slate/40 font-bold uppercase tracking-widest">New here?</span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-3 bg-white text-neutral-600">New to Wildlife Rescue?</span>
-            </div>
-          </div>
 
-          {/* Register Link */}
-          <Link
-            to="/register"
-            className="btn btn-outline btn-full"
-          >
-            Create an Account
-          </Link>
+            <Link
+              to="/register"
+              className="btn-outline w-full py-4 text-lg"
+            >
+              Create Member Account
+            </Link>
+          </div>
         </div>
 
-        {/* Footer Text */}
-        <p className="text-center text-sm text-neutral-600 mt-6">
-          By signing in, you agree to our terms and privacy policy
+        <p className="text-center text-sm text-nature-slate/40 mt-10 font-medium">
+          Protected by Wildlife AI Security Protocol
         </p>
       </div>
     </div>
