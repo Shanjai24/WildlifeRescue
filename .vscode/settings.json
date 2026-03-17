@@ -1,7 +1,6 @@
 {
-    "git.ignoreLimitWarning": true,
-    "css.lint.unknownAtRules": "ignore",
-    "files.associations": {
-        "*.css": "tailwindcss"
-    }
+  "python.defaultInterpreterPath": "C:\\Users\\Home\\AppData\\Local\\Programs\\Python\\Python313\\python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/ml"
+  ]
 }
