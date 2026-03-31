@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    outDir: 'dist',
+    sourcemap: false,
+  },
   server: {
     proxy: {
       // Auth, incidents, rescuer, admin → Node backend (port 4000)
@@ -23,4 +27,4 @@ export default defineConfig({
       },
     },
   },
-})
+})

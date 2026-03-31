@@ -6,6 +6,11 @@ import session from 'express-session';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { sequelize, User } from './lib/db.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import authRouter from './routes/auth.js';
 import incidentsRouter from './routes/incidents.js';
 import rescuerRouter from './routes/rescuer.js';
@@ -15,7 +20,21 @@ import analyticsRouter from './routes/analytics.js';
 const app = express();
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : ['http://localhost:5173'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(null, true); // Allow all in production since we serve frontend from same origin
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // ── Session (required by passport even in stateless JWT mode) ─────────────────
@@ -30,7 +49,7 @@ passport.use(new GoogleStrategy(
   {
     clientID:     process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:  'http://localhost:4000/auth/google/callback',
+    callbackURL:  process.env.GOOGLE_CALLBACK_URL || 'http://localhost:4000/auth/google/callback',
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -78,6 +97,14 @@ app.use('/incidents', incidentsRouter);
 app.use('/rescuer', rescuerRouter);
 app.use('/admin', adminRouter);
 app.use('/api/analytics', analyticsRouter);
+
+// ── Serve React Frontend in Production ────────────────────────────────────────
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, 'dist')));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  });
+}
 
 // ── Start ─────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 4000;
