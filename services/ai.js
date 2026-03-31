@@ -64,3 +64,8 @@ export async function matchOrganizations({ incident }) {
   console.log(`⚠️ No local org found for "${incident.addressText}" — notifying all ${serviceFiltered.length} matching orgs`);
   return serviceFiltered;
 }
+
+export function predictRescueSuccess() {
+  // Stub: returns null when ML API is not deployed
+  return null;
+}
