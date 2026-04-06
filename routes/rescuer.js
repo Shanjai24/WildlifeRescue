@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { Op } from 'sequelize';
 import { auth, verifiedRescuerOnly } from '../middleware/auth.js';
-import { Incident, IncidentStatusHistory, Organization, Notification, User } from '../lib/db.js';
+import { Incident, IncidentStatusHistory, Organization, User } from '../lib/db.js';
 
 const router = Router();
 
@@ -55,13 +55,7 @@ router.post('/:id/accept', auth(), verifiedRescuerOnly(), async (req, res) => {
       changedByUserId: req.user.id 
     });
     
-    await Notification.create({
-      userId: incident.reporterId,
-      type: 'status_update',
-      payload: { incidentId: incident.id, status: 'accepted', organizationId: org.id },
-      isRead: false
-    });
-    
+
     res.json(incident);
   } catch (err) {
     console.error(err);
@@ -94,13 +88,7 @@ router.post('/:id/status', auth(), verifiedRescuerOnly(), async (req, res) => {
       changedByUserId: req.user.id 
     });
 
-    await Notification.create({
-      userId: incident.reporterId,
-      type: 'status_update',
-      payload: { incidentId: incident.id, status },
-      isRead: false
-    });
-    
+
     res.json(incident);
   } catch (err) {
     console.error(err);

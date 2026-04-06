@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import { auth, role } from '../middleware/auth.js';
-import { Incident, IncidentStatusHistory, Notification, Organization, Rescuer, User } from '../lib/db.js';
-import { classifyPriority, matchOrganizations, predictRescueSuccess } from '../services/ai.js';
-import { broadcast, sendToUsers } from './notifications.js';
+import { Incident, IncidentStatusHistory, Organization } from '../lib/db.js';
+import { classifyPriority, matchOrganizations } from '../services/ai.js';
+
 
 const router = Router();
 
@@ -28,34 +28,11 @@ router.post('/', auth(), role('animal_lover'), async (req, res) => {
 
     await IncidentStatusHistory.create({
       incidentId: incident.id,
-      status: 'reported',
+      status: 'open',
       changedByUserId: req.user.id
     });
 
-    const candidates = await matchOrganizations({ incident });
-
-    // Collect all rescuer UserIds
-    const rescuerUserIds = [];
-    for (const org of candidates) {
-      const rescuers = await Rescuer.findAll({ where: { OrganizationId: org.id }, include: User });
-      for (const rescuer of rescuers) {
-        rescuerUserIds.push(rescuer.UserId);
-        await Notification.create({
-          userId: rescuer.UserId,
-          type: 'incident_alert',
-          payload: { incidentId: incident.id, priority, organizationId: org.id },
-          isRead: false
-        });
-      }
-    }
-
-    // Send to specific rescuers
-    if (rescuerUserIds.length > 0) {
-      sendToUsers(rescuerUserIds, {
-        type: 'new_incident',
-        payload: incident
-      });
-    }
+    await matchOrganizations({ incident });
 
     res.status(201).json(incident);
   } catch (err) {

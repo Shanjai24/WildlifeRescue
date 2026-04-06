@@ -8,9 +8,21 @@ import joblib
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import os
+import base64
+from dotenv import load_dotenv
+from groq import Groq
+
+# Load .env file from parent directory
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for React frontend
+
+# Configure Groq client
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY')
+print(f"🔑 Groq API Key loaded: {'✅ Yes' if GROQ_API_KEY else '❌ Missing'}")
+
 
 # Load models at startup
 print("Loading ML models...")
@@ -263,6 +275,129 @@ def model_info():
             'success': False,
             'error': str(e)
         }), 400
+
+@app.route('/api/ai/identify-species', methods=['POST'])
+def identify_species():
+    """Identify animal species from an uploaded image using Groq Vision"""
+    try:
+        if 'image' not in request.files:
+            return jsonify({'success': False, 'error': 'No image uploaded'}), 400
+
+        if not GROQ_API_KEY:
+            return jsonify({'success': False, 'error': 'Groq API key not configured'}), 500
+
+        image_file = request.files['image']
+        image_bytes = image_file.read()
+        mime_type = image_file.content_type or 'image/jpeg'
+        b64_image = base64.b64encode(image_bytes).decode('utf-8')
+
+        client = Groq(api_key=GROQ_API_KEY)
+
+        prompt = """Analyze this image and identify the animal species.
+Respond ONLY with a valid JSON object (no markdown, no code blocks) in this exact format:
+{
+  "success": true,
+  "is_animal": true,
+  "top_prediction": {
+    "species": "Common Name",
+    "scientific_name": "Scientific Name",
+    "confidence": 0.92,
+    "conservation_status": "Least Concern"
+  },
+  "all_predictions": [
+    {"species": "...", "scientific_name": "...", "confidence": 0.92, "conservation_status": "..."}
+  ],
+  "notes": "Any relevant notes about the animal or image",
+  "model_info": {"architecture": "Groq Vision"}
+}
+If no animal is visible, set is_animal to false and use "Unknown" for species fields with confidence 0."""
+
+        response = client.chat.completions.create(
+            model='meta-llama/llama-4-scout-17b-16e-instruct',
+            messages=[{
+                'role': 'user',
+                'content': [
+                    {'type': 'image_url', 'image_url': {'url': f'data:{mime_type};base64,{b64_image}'}},
+                    {'type': 'text', 'text': prompt}
+                ]
+            }],
+            temperature=0.1
+        )
+
+        text = response.choices[0].message.content.strip()
+        if text.startswith('```'):
+            text = text.split('```')[1]
+            if text.startswith('json'):
+                text = text[4:]
+        import json
+        result = json.loads(text.strip())
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/ai/assess-injury', methods=['POST'])
+def assess_injury():
+    """Assess animal injury/condition from an uploaded image using Groq Vision"""
+    try:
+        if 'image' not in request.files:
+            return jsonify({'success': False, 'error': 'No image uploaded'}), 400
+
+        if not GROQ_API_KEY:
+            return jsonify({'success': False, 'error': 'Groq API key not configured'}), 500
+
+        image_file = request.files['image']
+        image_bytes = image_file.read()
+        mime_type = image_file.content_type or 'image/jpeg'
+        b64_image = base64.b64encode(image_bytes).decode('utf-8')
+
+        client = Groq(api_key=GROQ_API_KEY)
+
+        prompt = """Analyze this image and assess the animal's condition/injury.
+Respond ONLY with a valid JSON object (no markdown, no code blocks) in this exact format:
+{
+  "success": true,
+  "severity": {
+    "level": "moderate",
+    "confidence": 0.85
+  },
+  "injury_type": {
+    "type": "laceration",
+    "confidence": 0.78
+  },
+  "priority": "medium",
+  "visible_signs": ["sign 1", "sign 2"],
+  "recommendations": ["recommendation 1", "recommendation 2"],
+  "model_info": {"architecture": "Groq Vision"}
+}
+Severity level must be one of: critical, severe, moderate, mild.
+Priority must be one of: critical, high, medium, low."""
+
+        response = client.chat.completions.create(
+            model='meta-llama/llama-4-scout-17b-16e-instruct',
+            messages=[{
+                'role': 'user',
+                'content': [
+                    {'type': 'image_url', 'image_url': {'url': f'data:{mime_type};base64,{b64_image}'}},
+                    {'type': 'text', 'text': prompt}
+                ]
+            }],
+            temperature=0.1
+        )
+
+        text = response.choices[0].message.content.strip()
+        if text.startswith('```'):
+            text = text.split('```')[1]
+            if text.startswith('json'):
+                text = text[4:]
+        import json
+        result = json.loads(text.strip())
+        return jsonify(result)
+
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     print("\n" + "=" * 60)

@@ -203,8 +203,9 @@ export default function ReportIncident() {
                     >
                       <option value="wildlife">Wild Animal</option>
                       <option value="bird">Bird</option>
-                      <option value="reptile">Reptile / Amphibian</option>
-                      <option value="mammal">Large Mammal</option>
+                      <option value="wildlife">Reptile / Amphibian</option>
+                      <option value="dog">Dog</option>
+                      <option value="cat">Cat</option>
                       <option value="other">Unknown Species</option>
                     </select>
                   </div>
