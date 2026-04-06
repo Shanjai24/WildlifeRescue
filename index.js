@@ -15,7 +15,7 @@ import analyticsRouter from './routes/analytics.js';
 const app = express();
 
 // ── CORS ──────────────────────────────────────────────────────────────────────
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }));
 app.use(express.json());
 
 // ── Session (required by passport even in stateless JWT mode) ─────────────────
@@ -30,7 +30,7 @@ passport.use(new GoogleStrategy(
   {
     clientID:     process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:  'http://localhost:4000/auth/google/callback',
+    callbackURL:  process.env.GOOGLE_CALLBACK_URL || 'http://localhost:4000/auth/google/callback',
   },
   async (accessToken, refreshToken, profile, done) => {
     try {
@@ -88,8 +88,7 @@ async function start() {
     console.log('✅ Database connection established successfully.');
     // force: true will drop and recreate tables (needed for development when schema changes)
     // In production, use alter: true with a proper migration strategy
-    const syncOption = process.env.NODE_ENV === 'production' ? { alter: true } : { force: true };
-    await sequelize.sync(syncOption);
+    await sequelize.sync({ alter: true });
     console.log('✅ Database tables synchronized successfully.');
     app.listen(PORT, () => {
       console.log(`✅ Backend server running at http://localhost:${PORT}`);
