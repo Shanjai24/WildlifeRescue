@@ -5,12 +5,15 @@ import cors from 'cors';
 import session from 'express-session';
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import { sequelize, User } from './lib/db.js';
 import authRouter from './routes/auth.js';
 import incidentsRouter from './routes/incidents.js';
 import rescuerRouter from './routes/rescuer.js';
 import adminRouter from './routes/admin.js';
 import analyticsRouter from './routes/analytics.js';
+
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:5000';
 
 const app = express();
 
@@ -74,6 +77,10 @@ app.use(passport.session());
 
 // ── Health ────────────────────────────────────────────────────────────────────
 app.get('/health', (req, res) => res.json({ ok: true }));
+
+// ── ML Service Proxy ──────────────────────────────────────────────────────────
+app.use('/api/ai', createProxyMiddleware({ target: ML_SERVICE_URL, changeOrigin: true }));
+app.use('/predict', createProxyMiddleware({ target: ML_SERVICE_URL, changeOrigin: true }));
 
 // ── Routes ────────────────────────────────────────────────────────────────────
 app.use('/auth', authRouter);
