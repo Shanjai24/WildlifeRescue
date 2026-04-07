@@ -26,10 +26,18 @@ print(f"🔑 Groq API Key loaded: {'✅ Yes' if GROQ_API_KEY else '❌ Missing'}
 
 # Load models at startup
 print("Loading ML models...")
-priority_model = joblib.load('models/priority_classifier.joblib')
-success_model = joblib.load('models/success_predictor.joblib')
-label_encoders = joblib.load('models/label_encoders.joblib')
-print("✅ Models loaded successfully!")
+_dir = os.path.dirname(os.path.abspath(__file__))
+try:
+    priority_model = joblib.load(os.path.join(_dir, 'models', 'priority_classifier.joblib'))
+    success_model = joblib.load(os.path.join(_dir, 'models', 'success_predictor.joblib'))
+    label_encoders = joblib.load(os.path.join(_dir, 'models', 'label_encoders.joblib'))
+    print("✅ Models loaded successfully!")
+except Exception as e:
+    print(f"⚠️ Models could not be loaded: {e}")
+    priority_model = None
+    success_model = None
+    label_encoders = {}
+
 
 def encode_feature(feature_name, value):
     """Encode categorical feature using saved encoder"""
